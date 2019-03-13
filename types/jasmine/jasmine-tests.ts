@@ -1162,6 +1162,47 @@ describe("Custom matcher: 'toBeGoofy'", () => {
     });
 });
 
+describe('better typed spys', () => {
+    describe('a typed spy', () => {
+        const spy = jasmine.createSpy('spy', (num: number, str: string) => {
+            return `${num} and ${str}`;
+        });
+        it('has a typed returnValue', () => {
+            spy.and.returnValue('foo and 123');
+        });
+        it('has a typed calls property', () => {
+            spy.calls.first().args; // [string, number]
+            spy.calls.first().returnValue; // number
+        });
+        it('has a typed callFake', () => {
+            spy.and.callFake((num: number, str: string) => '');
+        });
+    });
+    describe('spyOn', () => {
+        it('only works on methods', () => {
+            const foo = {
+                method() {
+                    return 'baz';
+                },
+                value: 'value',
+            };
+            const spy = spyOn(foo, 'method');
+        })
+    });
+    describe('createSpyObj', () => {
+        it('returns the correct spy types', () => {
+            const foo = {
+                method() {
+                    return 'baz';
+                },
+                value: 'value',
+            };
+            const spyObj = jasmine.createSpyObj<typeof foo>('foo', ['method']);
+            spyObj.method.and.returnValue('123');
+        })
+    });
+});
+
 // test based on http://jasmine.github.io/2.5/custom_reporter.html
 var myReporter: jasmine.CustomReporter = {
     jasmineStarted: (suiteInfo: jasmine.SuiteInfo) => {
